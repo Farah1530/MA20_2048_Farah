@@ -1,5 +1,6 @@
 import tkinter as tk
 import random
+import tkinter.messagebox as messagebox
 
 # création de la fenêtre principale
 window = tk.Tk()
@@ -13,7 +14,7 @@ window_height = 600
 
 # couleur de fond de la fenêtre
 window.configure(bg='black')
-
+   
 # récupération de la taille de l'écran pour centrer la fenêtre
 screen_width = window.winfo_screenwidth()
 screen_height = window.winfo_screenheight()
@@ -55,7 +56,6 @@ class board:
         8192: "#330000",
     }
 
-    # couleur du texte selon la valeur
     # blanc pour toutes les tuiles
     text_color = {
         2: "#FFFFFF",
@@ -73,7 +73,6 @@ class board:
         8192: "#FFFFFF",
     }
 
-
 # je crée la grille du jeu
 grid = [[0 for _ in range(4)] for _ in range(4)]
 
@@ -85,12 +84,13 @@ frame = tk.Frame(window, bg="white")
 frame.pack(pady=0)
 
 
+
 # création des cases visuelles (labels)
 for i in range(4):
     for j in range(4):
         cell = tk.Label(
             frame,
-            text="",               # texte vide au début
+            text="blabla",               # texte vide au début
             width=6,               # largeur de la case
             height=3,              # hauteur de la case
             font=("Arial", 20, "bold"),     # police et taille du texte
@@ -98,7 +98,6 @@ for i in range(4):
         )
         cell.grid(row=i, column=j, padx=1, pady=2)
         cells[i][j] = cell
-
 
 # fonction qui ajoute une tuile (2 ou 4) dans une case vide
 # cette fonction cherche une case vide au hasard et y place un 2 ou un 4
@@ -111,6 +110,8 @@ def add_tile():
         i, j = random.choice(empty)   # choisir une case au hasard
         grid[i][j] = random.choice([2, 4])   # mettre un 2 ou un 4
         update_board()                # mettre à jour l'affichage
+
+
 
 
 # fonction qui met à jour l'affichage des tuiles a chaque fois qu'on ouvre ou ferme la fenetre
@@ -132,9 +133,93 @@ def update_board():
                 cells[i][j].config(text=str(value), bg=bg, fg=fg)
 
 
+def pack4(a, b, c, d):
+    # on met les 4 éléments dans une liste
+    if c == 0:
+        c = d
+        d = 0
+    if b == 0:
+        b = c
+        c = d
+        d = 0
+    if a == 0:
+        a = b
+        b = c
+        c = d
+        d = 0
+    if a == b :
+        a = 2*a
+        b = c
+        c = d 
+        d = 0   
+    if b == c :
+        b = 2*b
+        c = d
+        d = 0
+    if c == d :
+        c = 2*c
+        d = 0
+
+    return (a, b, c, d)
+
+print (pack4(0,0,0,2))  # devrait afficher (2, 0, 0, 0)
+print (pack4(0,0,2,2))  # devrait afficher (4, 0, 0, 0)
+print (pack4(2,0,2,2))  # devrait afficher (4, 2, 0, 0)
+print (pack4(2,2,2,2))  # devrait afficher (4, 4, 0, 0)
+print (pack4(2, 2, 4, 0))  # devrait afficher (4, 4, 0, 0)
+print (pack4(8,8,8,8))  # devrait afficher (16, 16, 0, 0)
+print (pack4(2,2,0,2))  # devrait afficher (4, 2, 0, 0)
+print (pack4(16,4,0,8))  # devrait afficher (32, 8, 0, 0)
+
+#faire la direction vers le bas
+def down():
+    for col in range(4):
+        (grid[0][col], grid[1][col], grid[2][col], grid[3][col]) = (grid[0][col], grid[1][col], grid[2][col], grid[3][col])
+    update_board()
+#faire la direction vers le haut
+def up():
+    for col in range (4):
+        (grid[3][col], grid[2][col], grid[1][col], grid[0][col]) = (grid[3][col], grid[2][col], grid[1][col], grid[0][col])
+    update_board()
+#faire la direction vers la gauche
+def left():
+    for ligne in range(4):
+        (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
+    update_board()
+#faire la direction vers la droite
+def right():
+    for ligne in range(4):
+        (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
+    update_board()
+
+
+
+#affectation des touches aux fonctions, q pour quitter, le reste pour "tasser" dans une certaine direction
+def key_pressed(event) :
+    touche=event.keysym #récupérer le symbole de la touche
+
+    if (touche=="Right" or touche=="d" or touche=="D"):
+        right()
+    if (touche=="Left" or touche=="a" or touche=="A"):
+        left()
+    if (touche=="Up" or touche=="w" or touche=="W"):
+        up()
+    if (touche=="Down" or touche=="s" or touche=="S"):
+        down()
+    if (touche=="Q" or touche=="q"):
+        result=messagebox.askokcancel("Confirmation", "vraiment quitter ?")
+        if result:
+            quit()
+
+
+window.bind('<Key>', key_pressed) #on traite les touches clavier
+
+
 # placer tous les numéros dans la grille avec leurs couleurs
 # on a tous les numéros du jeu a afficher
-numeros = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]
+#2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
+
+numeros = [2, 4, 8, 16,]
 
 # remplir la grille avec tous les numéros
 position = 0

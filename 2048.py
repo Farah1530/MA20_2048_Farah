@@ -1,6 +1,12 @@
+#Farah
+#2048
+#10.03.206
+
 import tkinter as tk
 import random
 import tkinter.messagebox as messagebox
+import random
+import copy
 
 # création de la fenêtre principale
 window = tk.Tk()
@@ -27,15 +33,15 @@ y_top = int(screen_height/2 - window_height/2)
 window.geometry(f"{window_width}x{window_height}+{x_left}+{y_top}")
 
 
-label = tk.Label(window, text="2048", font=("Arial", 15), bg="black", fg="green")
-label.pack(pady=20)
+lbl = tk.Label(window, text="2048", font=("Arial", 15), bg="black", fg="green")
+lbl.pack(pady=20)
 
 
-label2 = tk.Label(window, text="score", font=("Arial", 15), bg="black", fg="yellow")
-label2.pack(pady=10, padx=10)
+lbl2 = tk.Label(window, text="score", font=("Arial", 15), bg="black", fg="yellow")
+lbl2.pack(pady=10, padx=10)
 
-label3 = tk.Label(window, text="Nouveau score", font=("Arial", 15), bg="black", fg="#008888")
-label3.pack(pady=10, padx=10)
+lbl3 = tk.Label(window, text="Nouveau score", font=("Arial", 15), bg="black", fg="#008888")
+lbl3.pack(pady=10, padx=10)
 
 # classe qui contient les couleurs des tuiles
 class board:
@@ -73,8 +79,6 @@ class board:
         8192: "#FFFFFF",
     }
 
-# je crée la grille du jeu
-grid = [[0 for _ in range(4)] for _ in range(4)]
 
 # tableau qui contiendra les widgets Label pour afficher les tuiles
 cells = [[None for _ in range(4)] for _ in range(4)]
@@ -161,6 +165,7 @@ def pack4(a, b, c, d):
         d = 0
 
     return (a, b, c, d)
+#tasser tout le jeu dans une direction 
 
 print (pack4(0,0,0,2))  # devrait afficher (2, 0, 0, 0)
 print (pack4(0,0,2,2))  # devrait afficher (4, 0, 0, 0)
@@ -171,25 +176,26 @@ print (pack4(8,8,8,8))  # devrait afficher (16, 16, 0, 0)
 print (pack4(2,2,0,2))  # devrait afficher (4, 2, 0, 0)
 print (pack4(16,4,0,8))  # devrait afficher (32, 8, 0, 0)
 
-#faire la direction vers le bas
+#faire la direction vers le bas il faut un pack4 entre le premier et le deuxieme faux qu ils soient identique sinon sa marche pas 
+#j avais un bug c etais le tassement 
 def down():
     for col in range(4):
-        (grid[0][col], grid[1][col], grid[2][col], grid[3][col]) = (grid[0][col], grid[1][col], grid[2][col], grid[3][col])
+        (grid[3][col], grid[2][col], grid[1][col], grid[0][col]) = pack4(grid[3][col], grid[2][col], grid[1][col], grid[0][col])
     update_board()
 #faire la direction vers le haut
 def up():
     for col in range (4):
-        (grid[3][col], grid[2][col], grid[1][col], grid[0][col]) = (grid[3][col], grid[2][col], grid[1][col], grid[0][col])
+        (grid[0][col], grid[1][col], grid[2][col], grid[3][col]) = pack4(grid[0][col], grid[1][col], grid[2][col], grid[3][col])
     update_board()
 #faire la direction vers la gauche
 def left():
     for ligne in range(4):
-        (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
+        (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = pack4(grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
     update_board()
 #faire la direction vers la droite
 def right():
     for ligne in range(4):
-        (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
+        (grid[ligne][3], grid[ligne][2], grid[ligne][1], grid[ligne][0]) = pack4(grid[ligne][3], grid[ligne][2], grid[ligne][1], grid[ligne][0])
     update_board()
 
 
@@ -197,7 +203,8 @@ def right():
 #affectation des touches aux fonctions, q pour quitter, le reste pour "tasser" dans une certaine direction
 def key_pressed(event) :
     touche=event.keysym #récupérer le symbole de la touche
-
+    m_grid = copy.deepcopy(grid)#memoriser le tableau grid
+    print(m_grid)
     if (touche=="Right" or touche=="d" or touche=="D"):
         right()
     if (touche=="Left" or touche=="a" or touche=="A"):
@@ -206,10 +213,33 @@ def key_pressed(event) :
         up()
     if (touche=="Down" or touche=="s" or touche=="S"):
         down()
+    print(grid)
+    print (m_grid)
+    if m_grid != grid:#si le tableau a changer il fait apparaitre un 2 ou un 4
+        apparition_de_tuiles()
     if (touche=="Q" or touche=="q"):
         result=messagebox.askokcancel("Confirmation", "vraiment quitter ?")
         if result:
             quit()
+
+
+#apparition aléatoire de tuiles de 2 ou de 4
+
+
+
+def apparition_de_tuiles():
+    # choisir si c'est un 2 ou un 4 (avecv 80% de chance pour le 2)
+    tb= [2,2,2,2,4,]
+    n=random.choice(tb)
+    print(n)
+    # choisir une case vide pour mettre n
+    c=[n,n,n,n,n]
+
+
+            
+
+
+
 
 
 window.bind('<Key>', key_pressed) #on traite les touches clavier
@@ -219,18 +249,16 @@ window.bind('<Key>', key_pressed) #on traite les touches clavier
 # on a tous les numéros du jeu a afficher
 #2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
 
-numeros = [2, 4, 8, 16,]
+numeros = [2, 2, 2, 2,]
 
 # remplir la grille avec tous les numéros
-position = 0
-for i in range(4):
-    for j in range(4):
-        if position < len(numeros):
-            grid[i][j] = numeros[position]
-            position += 1
+grid= [[2,2,4,4],
+       [2,2,4,4],
+       [4,4,2,2],
+       [0,2,0,0]]
 
 # mettre a jour l affichage pour montrer tous les numéros
 update_board()
-
+apparition_de_tuiles()
 # boucle principale Tkinter
 window.mainloop()

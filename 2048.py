@@ -177,22 +177,22 @@ print (pack4(2,2,0,2))  # devrait afficher (4, 2, 0, 0)
 print (pack4(16,4,0,8))  # devrait afficher (32, 8, 0, 0)
 
 #faire la direction vers le bas il faut un pack4 entre le premier et le deuxieme faux qu ils soient identique sinon sa marche pas 
-#j avais un bug c etais le tassement 
-def down():
+#j avais un bug c etais avc le tassement normale mtn ca marche 
+def down():    #pour aller vers le bas
     for col in range(4):
         (grid[3][col], grid[2][col], grid[1][col], grid[0][col]) = pack4(grid[3][col], grid[2][col], grid[1][col], grid[0][col])
     update_board()
-#faire la direction vers le haut
+#pour aller vers le haut
 def up():
     for col in range (4):
         (grid[0][col], grid[1][col], grid[2][col], grid[3][col]) = pack4(grid[0][col], grid[1][col], grid[2][col], grid[3][col])
     update_board()
-#faire la direction vers la gauche
+#pour aller vers la gauche
 def left():
     for ligne in range(4):
         (grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3]) = pack4(grid[ligne][0], grid[ligne][1], grid[ligne][2], grid[ligne][3])
     update_board()
-#faire la direction vers la droite
+#pour aller vers la droite
 def right():
     for ligne in range(4):
         (grid[ligne][3], grid[ligne][2], grid[ligne][1], grid[ligne][0]) = pack4(grid[ligne][3], grid[ligne][2], grid[ligne][1], grid[ligne][0])
@@ -217,26 +217,69 @@ def key_pressed(event) :
     print (m_grid)
     if m_grid != grid:#si le tableau a changer il fait apparaitre un 2 ou un 4
         apparition_de_tuiles()
+        if gagné_ou_perdu() ==True:  
+            update_board()     #si gagné_ou_perdu est vrai alors perdu le jeux se ferme
+            perdu()                        #c est la fonction qui ferme le jeux une fois perdu
+    update_board()
     if (touche=="Q" or touche=="q"):
         result=messagebox.askokcancel("Confirmation", "vraiment quitter ?")
         if result:
             quit()
 
 
+
+
 #apparition aléatoire de tuiles de 2 ou de 4
-
-
-
 def apparition_de_tuiles():
     # choisir si c'est un 2 ou un 4 (avecv 80% de chance pour le 2)
     tb= [2,2,2,2,4,]
     n=random.choice(tb)
     print(n)
-    # choisir une case vide pour mettre n
-    c=[n,n,n,n,n]
+#trouve toutes les case vides 
+    case_vide = [] #la variable de la case vide
+    for col in range (4):  # il parcourt la partie colonne
+        for li in range (4): # il parcourt la partie ligne 
+            if grid[li][col]==0: # la on fait si le grid li et col parcouru mettre 
+                case_vide.append((li,col)) #la c est pour ajouter la case vide
+                print(case_vide)  #c est pour voir dans la console
+
+    (li,col)= random.choice(case_vide)  
+    grid[li][col]=n
 
 
+
+
+#maintenant je vais faire une fonction qui affiche quand le jeu est terminer
+
+def gagné_ou_perdu():
+    for col in range (4):   #il verifie les colonnes si elles sont vide ou pas
+        for li in range (4):  # il verifie les ligne si elle sont vide ou pas 
+            if grid [li][col] == 0: #et si le grid li et col est vide returne faux ducoup c est pas fini
+                return False
             
+#on verifie si c est y a des possibilité de fusion en horizentale
+    for col in range (4): #il verifie les colonnes si elles sont vide ou pas
+        for li in range (4): # il verifie les ligne si elle sont vide ou pas 
+            if grid [li][col] == 0:  #et si le grid li et col est vide returne faux ducoup c est pas fini
+                return False
+            
+
+    for col in range (4):  #il verifie les colonnes si elles sont vide ou pas
+        for li in range (4):  # il verifie les ligne si elle sont vide ou pas 
+            if grid [li][col] == 0:   #et si le grid li et col est vide returne faux ducoup c est pas fini
+                return False
+            
+    return True      #quand c est vrai 
+
+
+    
+def perdu():
+    print("perdu")   # pour voir le msg perdu dans le terminal
+    messagebox.showinfo("Perdu", "T'as perdu nullllll")      #c est le messagebox qui permet d affiche une quoi perdu et le jeux s arrete
+    quit ()      #le jeux s arrete 
+    
+
+
 
 
 
@@ -260,5 +303,6 @@ grid= [[2,2,4,4],
 # mettre a jour l affichage pour montrer tous les numéros
 update_board()
 apparition_de_tuiles()
+
 # boucle principale Tkinter
 window.mainloop()

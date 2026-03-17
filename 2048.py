@@ -32,18 +32,18 @@ y_top = int(screen_height/2 - window_height/2)
 # application de la taille et de la position
 window.geometry(f"{window_width}x{window_height}+{x_left}+{y_top}")
 
-
+# pour afficher le titre dans tkinter
 lbl = tk.Label(window, text="2048", font=("Arial", 15), bg="black", fg="green")
 lbl.pack(pady=20)
 
-
+#pour afficher le score pour l instant y a rien dans le score
 lbl2 = tk.Label(window, text="score", font=("Arial", 15), bg="black", fg="yellow")
 lbl2.pack(pady=10, padx=10)
-
+#pour afficher le nouveau score le record a chaque fois qu il est battu pour l'instant il est pas fonctionnel
 lbl3 = tk.Label(window, text="Nouveau score", font=("Arial", 15), bg="black", fg="#008888")
 lbl3.pack(pady=10, padx=10)
 
-# classe qui contient les couleurs des tuiles
+# classe de tableau qui contient les couleurs des tuiles
 class board:
     # couleur de fond selon la valeur
     bg_color = {
@@ -62,7 +62,7 @@ class board:
         8192: "#330000",
     }
 
-    # blanc pour toutes les tuiles
+    # blanc pour toutes les numéro de tuiles qui ecrit en blanc
     text_color = {
         2: "#FFFFFF",
         4: "#FFFFFF",
@@ -136,7 +136,7 @@ def update_board():
                 # applique le texte et les couleurs a la case
                 cells[i][j].config(text=str(value), bg=bg, fg=fg)
 
-
+#permet de tasser les tuilles
 def pack4(a, b, c, d):
     # on met les 4 éléments dans une liste
     if c == 0:
@@ -257,19 +257,18 @@ def gagné_ou_perdu():
             if grid [li][col] == 0: #et si le grid li et col est vide returne faux ducoup c est pas fini
                 return False
             
+    
 #on verifie si c est y a des possibilité de fusion en horizentale
     for col in range (4): #il verifie les colonnes si elles sont vide ou pas
         for li in range (4): # il verifie les ligne si elle sont vide ou pas 
-            if grid [li][col] == 0:  #et si le grid li et col est vide returne faux ducoup c est pas fini
+            if grid [li][col] == grid [li][col +1]:  #et si le grid li et col est vide returne faux ducoup c est pas fini
                 return False
-            
+            if grid [li][col] == grid [li +1][col]:
+                return False
 
-    for col in range (4):  #il verifie les colonnes si elles sont vide ou pas
-        for li in range (4):  # il verifie les ligne si elle sont vide ou pas 
-            if grid [li][col] == 0:   #et si le grid li et col est vide returne faux ducoup c est pas fini
-                return False
-            
-    return True      #quand c est vrai 
+
+
+        return True      #quand c est vrai 
 
 
     

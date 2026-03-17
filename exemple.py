@@ -62,25 +62,3 @@ win.mainloop()
 
 
 
-
-#mettre fin de jeux qaund c est fini
-def jeu_fini():
-    # vérifier si il y a encore des cases vides
-    for i in range(4):
-        for j in range(4):
-            if grid[i][j] == 0:
-                return False  # encore des cases vides, pas fini
-    
-    # vérifier si des fusions sont encore possibles (horizontal)
-    for i in range(4):
-        for j in range(3):
-            if grid[i][j] == grid[i][j+1]:
-                return False  # fusion possible, pas game over
-    
-    # vérifier si des fusions sont encore possibles (vertical)
-    for i in range(3):
-        for j in range(4):
-            if grid[i][j] == grid[i+1][j]:
-                return False  # fusion possible, pas fini
-    
-    return True  # grille pleine + aucune fusion possible = le jeux est terminer

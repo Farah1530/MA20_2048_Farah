@@ -15,8 +15,8 @@ window = tk.Tk()
 window.title("2048")
 
 # largeur et hauteur de la fenêtre
-window_width = 600
-window_height = 600
+window_width = 800
+window_height = 800
 
 # couleur de fond de la fenêtre
 window.configure(bg='black')
@@ -39,9 +39,40 @@ lbl.pack(pady=20)
 #pour afficher le score pour l instant y a rien dans le score
 lbl2 = tk.Label(window, text="score", font=("Arial", 15), bg="black", fg="yellow")
 lbl2.pack(pady=10, padx=10)
-#pour afficher le nouveau score le record a chaque fois qu il est battu pour l'instant il est pas fonctionnel
-lbl3 = tk.Label(window, text="Nouveau score", font=("Arial", 15), bg="black", fg="#008888")
-lbl3.pack(pady=10, padx=10)
+
+
+#le score sert a compter le nombre de point 
+score = 0
+deja_gagne = False
+
+def recommencer():
+    global grid
+    global score
+    global deja_gagne
+    score = 0
+    deja_gagne = False
+    grid= [[0,0,0,0],
+       [0,0,0,0],
+       [0,0,0,0],
+       [0,0,0,0]]
+    add_tile()
+    add_tile()
+    update_board()
+#je fais le btn recommencer 
+btn_recommencer = tk.Button (window,text="recommencer", font = ("arial",15), bg="black", fg="#008888", command=recommencer)
+btn_recommencer.pack(pady=10)
+
+#le btn quitter pour que je puisse quitter 
+def quitter_le_jeu():
+    sauvegarder_score()
+    window.destroy()
+    
+# sur le bouton
+btn_quitter = tk.Button(window, text="quitter", font=("arial", 15), bg="black", fg="red", command=quitter_le_jeu)
+btn_quitter.pack(pady=10)
+
+
+
 
 # classe de tableau qui contient les couleurs des tuiles
 class board:
@@ -81,7 +112,10 @@ class board:
 
 
 # tableau qui contiendra les widgets Label pour afficher les tuiles
-cells = [[None for _ in range(4)] for _ in range(4)]
+cells = [[None, None, None, None],
+         [None, None, None, None],
+         [None, None, None, None],
+         [None, None, None, None]]
 
 # frame qui contient la grille visuelle
 frame = tk.Frame(window, bg="white")
@@ -90,30 +124,32 @@ frame.pack(pady=0)
 
 
 # création des cases visuelles (labels)
-for i in range(4):
-    for j in range(4):
+for col in range(4):
+    for li in range(4):
         cell = tk.Label(
             frame,
-            text="blabla",               # texte vide au début
+            text="",               # texte vide au début
             width=6,               # largeur de la case
             height=3,              # hauteur de la case
             font=("Arial", 20, "bold"),     # police et taille du texte
             fg="white",            # couleur du texte
         )
-        cell.grid(row=i, column=j, padx=1, pady=2)
-        cells[i][j] = cell
+        cell.grid(row=col, column=li, padx=1, pady=2)
+        cells[col][li] = cell
 
 # fonction qui ajoute une tuile (2 ou 4) dans une case vide
 # cette fonction cherche une case vide au hasard et y place un 2 ou un 4
 def add_tile():
-    # liste des cases vides
-    empty = [(i, j) for i in range(4) for j in range(4) if grid[i][j] == 0]
+    empty = [] #pour cette fonction je me suis aider avc l'ia
+    for col in range(4):
+        for li in range(4):
+            if grid[col][li] == 0:
+                empty.append((col, li))
 
-    # si il reste des cases vides
     if empty:
-        i, j = random.choice(empty)   # choisir une case au hasard
-        grid[i][j] = random.choice([2, 4])   # mettre un 2 ou un 4
-        update_board()                # mettre à jour l'affichage
+        col, li = random.choice(empty)
+        grid[col][li] = random.choice([2, 4])
+        update_board()
 
 
 
@@ -121,6 +157,8 @@ def add_tile():
 # fonction qui met à jour l'affichage des tuiles a chaque fois qu'on ouvre ou ferme la fenetre
 # parcourt toutes les cases de la grille et applique les couleurs correspondantes
 def update_board():
+    meilleur_score= lire_meilleur_score()
+    lbl2.config(text=f"Score : {score}   | Meilleur_score : {meilleur_score}")
     for i in range(4):
         for j in range(4):
             value = grid[i][j]
@@ -139,6 +177,7 @@ def update_board():
 #permet de tasser les tuilles
 def pack4(a, b, c, d):
     # on met les 4 éléments dans une liste
+    global score
     if c == 0:
         c = d
         d = 0
@@ -151,17 +190,20 @@ def pack4(a, b, c, d):
         b = c
         c = d
         d = 0
-    if a == b :
+    if a == b and a !=0:
         a = 2*a
+        score += a
         b = c
         c = d 
         d = 0   
-    if b == c :
+    if b == c and b !=0:
         b = 2*b
+        score += b
         c = d
         d = 0
-    if c == d :
+    if c == d and c !=0:
         c = 2*c
+        score += c
         d = 0
 
     return (a, b, c, d)
@@ -202,6 +244,7 @@ def right():
 
 #affectation des touches aux fonctions, q pour quitter, le reste pour "tasser" dans une certaine direction
 def key_pressed(event) :
+    gagné=False
     touche=event.keysym #récupérer le symbole de la touche
     m_grid = copy.deepcopy(grid)#memoriser le tableau grid
     print(m_grid)
@@ -217,9 +260,13 @@ def key_pressed(event) :
     print (m_grid)
     if m_grid != grid:#si le tableau a changer il fait apparaitre un 2 ou un 4
         apparition_de_tuiles()
-        if gagné_ou_perdu() ==True:  
-            update_board()     #si gagné_ou_perdu est vrai alors perdu le jeux se ferme
-            perdu()                        #c est la fonction qui ferme le jeux une fois perdu
+        resultat = gagné_ou_perdu()
+        if resultat == "gagné":
+            recommencer()
+        elif resultat ==True:
+            update_board()
+            perdu()
+            recommencer()            
     update_board()
     if (touche=="Q" or touche=="q"):
         result=messagebox.askokcancel("Confirmation", "vraiment quitter ?")
@@ -252,31 +299,73 @@ def apparition_de_tuiles():
 #maintenant je vais faire une fonction qui affiche quand le jeu est terminer
 
 def gagné_ou_perdu():
-    for col in range (4):   #il verifie les colonnes si elles sont vide ou pas
-        for li in range (4):  # il verifie les ligne si elle sont vide ou pas 
+
+    # vérifier si y a un 2048 dans la grille
+    # par
+    for li in range(4):
+        for col in range(4):
+            if grid[li][col] == 2048:
+                global deja_gagne
+                if deja_gagne == False:
+                    deja_gagne = True
+                    reponse = messagebox.askyesno("gagné", "bien joué t as gagné est ce que tu veux continuer?")
+                    if reponse:
+                     return False
+                    else:
+                        return "gagné"
+
+
+    for li in range (4):   #il verifie les colonnes si elles sont vide ou pas
+        for col in range (4):  # il verifie les ligne si elle sont vide ou pas 
             if grid [li][col] == 0: #et si le grid li et col est vide returne faux ducoup c est pas fini
                 return False
-            
-    
-#on verifie si c est y a des possibilité de fusion en horizentale
-    for col in range (4): #il verifie les colonnes si elles sont vide ou pas
-        for li in range (4): # il verifie les ligne si elle sont vide ou pas 
+      #on verifie si c est y a des possibilité de fusion en horizentale
+    for li in range (4): #il verifie les lignes si elles sont vide ou pas
+        for col in range (3): # il verifie les colonnes si elle sont vide ou pas 
             if grid [li][col] == grid [li][col +1]:  #et si le grid li et col est vide returne faux ducoup c est pas fini
                 return False
+          
+    
+#on verifie si c est y a des possibilité de fusion en horizentale
+    for li in range (3): #il verifie les ligne si elles sont vide ou pas
+        for col in range (4): # il verifie les colonnes si elle sont vide ou pas 
             if grid [li][col] == grid [li +1][col]:
                 return False
 
 
 
-        return True      #quand c est vrai 
+    return True      #quand c est vrai 
 
 
     
 def perdu():
     print("perdu")   # pour voir le msg perdu dans le terminal
-    messagebox.showinfo("Perdu", "T'as perdu nullllll")      #c est le messagebox qui permet d affiche une quoi perdu et le jeux s arrete
-    quit ()      #le jeux s arrete 
+    #c est le messagebox qui permet d affiche une quoi perdu et le jeux s arrete
+    #quit ()      #le jeux s arrete 
+    sauvegarder_score()
+    meilleur_score= lire_meilleur_score()
+    messagebox.showinfo("perdu", f"t as perdu nullllll\nTon score : {score}\nMeilleur score : {meilleur_score}")
     
+
+
+
+
+
+def lire_meilleur_score():
+    try:
+        with open("meilleur_score.txt", "r") as f:
+            return int(f.read())
+    except:
+        return 0
+
+def sauvegarder_score():
+    meilleur = lire_meilleur_score()
+    if score > meilleur:
+        with open("meilleur_score.txt", "w") as f:
+            f.write(str(score))
+
+
+
 
 
 
@@ -294,6 +383,10 @@ window.bind('<Key>', key_pressed) #on traite les touches clavier
 numeros = [2, 2, 2, 2,]
 
 # remplir la grille avec tous les numéros
+#grid= [[2,2,4,4],
+        #[2,2,4,4],
+       #[4,4,2,2],
+       #[0,2,0,0]]
 grid= [[2,2,4,4],
        [2,2,4,4],
        [4,4,2,2],
